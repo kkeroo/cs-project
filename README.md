@@ -139,3 +139,7 @@ The code for the kernels can be found in the folders `hls/src/dwt.c` and `hls/sr
 ```console
 $ ssh username-ID@nsc-login2.ijs.si
 ```
+
+## Literature 
+
+Jeff Calder, [The Discrete Wavelet Transform](https://www-users.cse.umn.edu/~jwcalder/5467/lec_dwt.pdf), Mathematics of Image and Data Analysis Math 546 
