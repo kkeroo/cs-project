@@ -1,93 +1,141 @@
-# student-project-rs
+# Discrete Wavelet Transform
 
 
+## Introduction 
 
-## Getting started
+The Discrete Wavelet Transform (DWT) is a well known transformation used in signal processing and image compression that transforms a discrete signal into a set of wavelet coefficients. Wavelets, as basis functions, offer a powerful alternative to traditional methods like Fourier series in signal and image analysis. A wavelet is a waveform of effectively limited duration that has an average value of zero and nonzero norm. Unlike Fourier basis functions, which are sinusoids of varying frequencies, wavelets are localized in both time and frequency domains, enabling them to capture localized features and transient behavior more effectively. This localization property makes wavelets particularly well-suited for analyzing signals with discontinuities or sharp changes, as they can provide both time and frequency information simultaneously. Moreover, wavelets offer a multi-resolution analysis, allowing for the representation of signals at different levels of detail. This property makes DWT a powerful tool in various applications such as image compression (e.g., JPEG2000), denoising, and feature extraction in pattern recognition. Its ability to represent data at multiple resolutions simultaneously makes it a versatile and widely used method in modern signal processing.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Haar Wavelet Transform
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+The Haar Wavelet Transform a represent one of the most simplest transformation in wavelet theory, due to its simplicity and computational efficiency. It operates by recursively decomposing a signal into pairs of averages and differences, which correspond to the approximation and detail coefficients, respectively. This binary splitting approach makes the Haar transform particularly intuitive, as it uses a step function that switches between 1 and -1. The transform's effectiveness lies in its ability to localize both time and frequency information, making it adept at analyzing signals with abrupt changes or discontinuities. Due to its straightforward implementation and minimal computational requirements, the Haar Wavelet Transform is widely used in various fields, including signal processing, image compression, and data analysis.
 
-## Add your files
+Let's take a 1D signal represented by the array [4, 6, 10, 12, 14, 16, 18, 20] and apply the Haar Wavelet Transform to it.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+1. **First Level Decomposition:**
+   - Pair the numbers and compute the averages and differences:
+     - (4, 6): Average = (4 + 6) / 2 = 5, Difference = (4 - 6) / 2 = -1
+     - (10, 12): Average = (10 + 12) / 2 = 11, Difference = (10 - 12) / 2 = -1
+     - (14, 16): Average = (14 + 16) / 2 = 15, Difference = (14 - 16) / 2 = -1
+     - (18, 20): Average = (18 + 20) / 2 = 19, Difference = (18 - 20) / 2 = -1
+   - This results in:
+     - Averages: [5, 11, 15, 19]
+     - Differences: [-1, -1, -1, -1]
+
+2. **Second Level Decomposition:**
+   - Now, decompose the averages array [5, 11, 15, 19]:
+     - (5, 11): Average = (5 + 11) / 2 = 8, Difference = (5 - 11) / 2 = -3
+     - (15, 19): Average = (15 + 19) / 2 = 17, Difference = (15 - 19) / 2 = -2
+   - This results in:
+     - Averages: [8, 17]
+     - Differences: [-3, -2]
+
+3. **Third Level Decomposition:**
+   - Finally, decompose the averages array [8, 17]:
+     - (8, 17): Average = (8 + 17) / 2 = 12.5, Difference = (8 - 17) / 2 = -4.5
+   - This results in:
+     - Averages: [12.5]
+     - Differences: [-4.5]
+
+4. **Combining Results:**
+   - The final output consists of the last average coefficient and all the difference coefficients from each level:
+     - Final Approximation Coefficient: [12.5]
+     - Detail Coefficients: [-4.5, -3, -2, -1, -1, -1, -1]
+
+So, after applying the Haar Wavelet Transform to the array [4, 6, 10, 12, 14, 16, 18, 20], we get the transformed signal:
+[ 12.5, -4.5, -3, -2, -1, -1, -1, -1 ]
+
+This transformation effectively condenses the original signal into a set of coefficients that highlight the overall trend (approximation) and the detailed fluctuations (differences) at various levels of resolution.
+
+### 2D Haar Wavelet 
+
+The recursive algorithm for the 2D Haar Wavelet Transform using 2x2 blocks involves iteratively applying the Haar transform to progressively smaller submatrices of the image. This approach ensures that the image is decomposed into multiple levels of resolution, capturing both coarse and fine details. We can describe it with following algorithm: 
+
 
 ```
-cd existing_repo
-git remote add origin https://repo.sling.si/ratkop/student-project-rs.git
-git branch -M main
-git push -uf origin main
+Function DWTHaar2D(matrix, levels):
+    N = size(matrix)  # Get the size of the matrix
+        # Apply the 2D Haar Transform to the NxN submatrix
+        if(levels > 0):
+            for i = 0 to N-1 by 2:
+                for j = 0 to N-1 by 2:
+                    # Get the 2x2 block
+                    a = matrix[i][j]
+                    b = matrix[i][j+1]
+                    c = matrix[i+1][j]
+                    d = matrix[i+1][j+1]
+                    
+                    # Compute the averages and differences
+                    A = a + b + c + d  # Approximation
+                    H = (-a - b + c + d)  # Horizontal detail
+                    V = (-a + b - c + d)  # Vertical detail
+                    D = (a - b - c + d)  # Diagonal detail
+                    
+                    # Place the computed values back into the matrix
+                    matrix[i/2][j/2] = A  # Top-left quadrant
+                    matrix[i/2 + N/2][j/2 ] = H  # Top-right quadrant
+                    matrix[i/2][j/2 + N/2] = V  # Bottom-left quadrant
+                    matrix[(i/2) + N/2][(j/2) + N/2] = D  # Bottom-right quadrant
+
+            DWTHaar2D(A, level-1)
+
+
+        # Reduce the size for the next level of decomposition
+    return matrix
 ```
 
-## Integrate with your tools
+where `matrix` represents square matrix dimension `N x N`, while the `levels` represents numbers of decompostion/resolution levels that we want to calculate. In folder images you can image `elaine.jpg` and its Wavelet transformation `dwt_output.jpg` in first level.  
 
-- [ ] [Set up project integrations](https://repo.sling.si/ratkop/student-project-rs/-/settings/integrations)
+The inverse Haar wavelet transform can be described with the following algorithm: 
 
-## Collaborate with your team
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```
+Function InverseHaarWavelet(matrix, levels):
+    N = size(matrix)  # Get the size of the matrix
 
-## Test and Deploy
+    n2 = n // 2  # Half of the size 
+    g = copy(matrix)  # Copy the input matrix to preserve original data
+    
 
-Use the built-in continuous integration in GitLab.
+    if level >= 1:
+        # Recursive call to process the top-left quadrant
+        A = InverseHaarWavelet(matrix[:n2, :n2], levels-1)
+        
+        # Invert filter using the Haar wavelet coefficients
+        H = matrix[n2:2*n2, :n2]
+        V = matrix[:n2, n2:2*n2]
+        D = matrix[n2:2*n2, n2:2*n2]
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+        # Reconstruct the original values from the coefficients
+        for i = 0 to n2-1:
+            for j = 0 to n2-1:
+                g[2*i, 2*j] = (A[i, j] - H[i, j] - V[i, j] + D[i, j]) / 4
+                g[2*i, 2*j + 1] = (A[i, j] - H[i, j] + V[i, j] - D[i, j]) / 4
+                g[2*i + 1, 2*j] = (A[i, j] + H[i, j] - V[i, j] - D[i, j]) / 4
+                g[2*i + 1, 2*j + 1] = (A[i, j] + H[i, j] + V[i, j] + D[i, j]) / 4
 
-***
+    return g
 
-# Editing this README
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Task - HLS synthesis of wavelet transformation 
 
-## Suggestions for a good README
+- (3 pts) In the first step, you will write functions for the forward and inverse wavelet transform, and test their functionality using a sample image from the folder images. A code snippet can be found in the folder `src/sw`.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- (12 pts) In the second step, you will use the Vitis HLS tool to develop and optimize kernels for the forward and inverse DWT:
 
-## Name
-Choose a self-explaining name for your project.
+  - (3/12 pts) Analyze the delay and resource utilization of the base version for DWT and IDWT with one level of decomposition for matrix sizes: 256 x 256, 512 x 512, and 1024 x 1024. 
+  - (3/12 pts) Analyze the delay and resource utilization of the base version for DWT and IDWT for a matrix size of 512 x 512 with the following number of decomposition levels: 4, 5, 6, and 7.
+  - (4/12 pts) Using pragmas, optimize the kernel. Report your findings for a matrix size of 512 x 512 with 2 levels of decomposition.
+  - (2/12 pts) Starting from the previously optimized kernel, try to employ the dataflow pragma. Report the resource utilization and delay.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+The code for the kernels can be found in the folders `hls/src/dwt.c` and `hls/src/idwt.c`. To run HLS synthesis, you will use the sbatch script `sbatch_script.sh`, which runs the script `run_hls.sh`.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+- (5 pts) The final five points will be awarded based on your project presentation.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Connecting to SLING NSC cluster
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+- Open the terminal and connect to the cluster using SSH
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```console
+$ ssh username-ID@nsc-login2.ijs.si
+```
