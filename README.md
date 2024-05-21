@@ -76,7 +76,7 @@ Function DWTHaar2D(matrix, levels):
                     matrix[i/2][j/2 + N/2] = V  # Bottom-left quadrant
                     matrix[(i/2) + N/2][(j/2) + N/2] = D  # Bottom-right quadrant
 
-            DWTHaar2D(A, level-1)
+            DWTHaar2D(matrix[:N/2][:N/2], level-1)
 
 
         # Reduce the size for the next level of decomposition
