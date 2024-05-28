@@ -31,7 +31,7 @@ cd $BUILD_DIR
 
 
 # uncomment to run HLS for dwt
-#vitis_hls -f run_hls_dwt.tcl
+# vitis_hls -f run_hls_dwt.tcl
 
 
 # uncomment to run HLS for idwt

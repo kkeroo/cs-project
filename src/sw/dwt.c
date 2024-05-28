@@ -27,6 +27,45 @@ void forward_wavelet_transform(double *image, double* output, int levels) {
     int height = IMAGE_WIDTH;
     int width = IMAGE_WIDTH;
 
+    // Temporary arrays to store intermediate results
+    double* temp_row = (double*)malloc(width * sizeof(double));
+    double* temp_col = (double*)malloc(height * sizeof(double));
+    // Iterate over each level of decomposition
+    for (int level = 0; level < levels; level++) {
+        int current_width = width >> level;
+        int current_height = height >> level;
+
+        // Process rows
+        for (i = 0; i < current_height; i++) {
+            for (j = 0; j < current_width / 2; j++) {
+                temp_row[j] = (image[i * current_width + 2 * j] + image[i * current_width + 2 * j + 1]) / 2.0;
+                temp_row[current_width / 2 + j] = (image[i * current_width + 2 * j] - image[i * current_width + 2 * j + 1]) / 2.0;
+            }
+            for (j = 0; j < current_width; j++) {
+                image[i * current_width + j] = temp_row[j];
+            }
+        }
+
+        // Process columns
+        for (j = 0; j < current_width; j++) {
+            for (i = 0; i < current_height / 2; i++) {
+                temp_col[i] = (image[2 * i * current_width + j] + image[(2 * i + 1) * current_width + j]) / 2.0;
+                temp_col[current_height / 2 + i] = (image[2 * i * current_width + j] - image[(2 * i + 1) * current_width + j]) / 2.0;
+            }
+            for (i = 0; i < current_height; i++) {
+                image[i * current_width + j] = temp_col[i];
+            }
+        }
+    }
+
+    // Copy the transformed image to the output
+    for (i = 0; i < height * width; i++) {
+        output[i] = image[i];
+    }
+
+    // Free temporary arrays
+    free(temp_row);
+    free(temp_col);
     // Approximation coefficient 
 
     // Horizontal coefficients
@@ -44,9 +83,47 @@ void inverse_wavelet_transform(double *image, double* output, int levels) {
     double temp;
     int height = IMAGE_WIDTH;
     int width = IMAGE_WIDTH;
-    
-   
 
+    // Temporary arrays to store intermediate results
+    double* temp_row = (double*)malloc(width * sizeof(double));
+    double* temp_col = (double*)malloc(height * sizeof(double));
+
+    // Iterate over each level of decomposition (in reverse order)
+    for (int level = levels - 1; level >= 0; level--) {
+        int current_width = width >> level;
+        int current_height = height >> level;
+
+        // Process columns
+        for (j = 0; j < current_width; j++) {
+            for (i = 0; i < current_height / 2; i++) {
+                temp_col[2 * i] = (image[i * current_width + j] + image[(current_height / 2 + i) * current_width + j]);
+                temp_col[2 * i + 1] = (image[i * current_width + j] - image[(current_height / 2 + i) * current_width + j]);
+            }
+            for (i = 0; i < current_height; i++) {
+                image[i * current_width + j] = temp_col[i];
+            }
+        }
+
+        // Process rows
+        for (i = 0; i < current_height; i++) {
+            for (j = 0; j < current_width / 2; j++) {
+                temp_row[2 * j] = (image[i * current_width + j] + image[i * current_width + current_width / 2 + j]);
+                temp_row[2 * j + 1] = (image[i * current_width + j] - image[i * current_width + current_width / 2 + j]);
+            }
+            for (j = 0; j < current_width; j++) {
+                image[i * current_width + j] = temp_row[j];
+            }
+        }
+    }
+
+    // Copy the reconstructed image to the output
+    for (i = 0; i < height * width; i++) {
+        output[i] = image[i];
+    }
+
+    // Free temporary arrays
+    free(temp_row);
+    free(temp_col);
 }
 
 

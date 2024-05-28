@@ -1,18 +1,18 @@
 #!/bin/bash
 
 # Job name:
-#SBATCH --job-name=vec_kmeans
+#SBATCH --job-name=dwt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1  
 #SBATCH --cpus-per-task=1 
-#SBATCH --time=00:05:00
+#SBATCH --time=00:03:00
 #SBATCH --output=test2.out
 #SBATCH --constraint=amd
 #SBATCH --reservation=fri
 #SBATCH --propagate=STACK
 
 
-FILE=k-means_sca
+FILE=dwt
 #FILE=example
 
 
